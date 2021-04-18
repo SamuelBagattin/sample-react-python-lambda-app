@@ -693,3 +693,6 @@ FodyWeavers.xsd
 *.tlog
 
 # End of https://www.toptal.com/developers/gitignore/api/serverless,python,react,intellij+all,vscode,visualstudio,visualstudiocode,windows,macos
+
+# Local Netlify folder
+.netlify
