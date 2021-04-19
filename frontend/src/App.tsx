@@ -1,37 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import './App.scss';
 import {useState} from "react";
-import {client} from "./api/api";
+import {getTodos, postTodo, TodoResponse} from "./api/api";
+import {RequestState} from "./api/request-state";
 
 
 function App() {
-	const [data, setData] = useState({state: "nodata", data: undefined});
+	const [dataFromApi, setDataFromApi] = useState<{state: RequestState, data: TodoResponse[]}>({state: RequestState.NoData, data: []});
+	const [dataFromInput, setDataFromInput] = useState("");
+
+	const refreshData = () => {
+		setDataFromApi({state: RequestState.Loading, data: []})
+		getTodos().then(
+			e => setDataFromApi({state: RequestState.Finished, data: e.data})
+		);
+	}
 
 	return (
 		<div className="App">
-			<main className="App-header">
-				<img src={logo} className="App-logo" alt="logo"/>
-				<p>
-					<button onClick={() => {
-						setData({state: "loading", data : undefined})
-						console.log(data)
-						client.get("/").then(
-							e => setData({state: "finished", data: e.data})
-						);
-					}}>
+			<main className="App-main">
+				<form onSubmit={(i) => {
+					i.preventDefault()
+					postTodo({name: dataFromInput}).then(() => refreshData())
+				}}>
+					<label>
+						Name:
+						<input type="text" name="name" onChange={(i) => setDataFromInput(i.target.value)}/>
+					</label>
+					<input type="submit" value="Submit"/>
+				</form>
+					<button onClick={refreshData}>
 						Click me !
 					</button>
-
-					<DisplayData data={data.data} state={data.state}/>
-				</p>
-				<a
-					className="App-link"
-					href="https://reactjs.org"
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					Learn React
-				</a>
+					<DisplayData data={dataFromApi.data} state={dataFromApi.state}/>
 			</main>
 
 		</div>
@@ -42,14 +42,17 @@ function App() {
 
 export default App;
 
-const DisplayData = ({state, data}: { state: string, data: any }) => {
-	console.log(state)
+const DisplayData = ({state, data}: { state: RequestState, data: TodoResponse[] }) => {
 	switch (state) {
-		case "finished":
-			return <div>{data}</div>
-		case "loading":
+		case RequestState.Finished:
+			return <div>
+				<ul>
+					{data.map(e => (<li>{e.name}</li>))}
+				</ul>
+			</div>
+		case RequestState.Loading:
 			return <div>Loading...</div>
-		case "nodata":
+		case RequestState.NoData:
 			return <div>No data loaded !</div>
 		default:
 			return <div>Err</div>
