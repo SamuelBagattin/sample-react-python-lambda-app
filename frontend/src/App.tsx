@@ -51,7 +51,12 @@ const DisplayData = ({state, data}: { state: RequestState, data: TodoResponse[] 
 				</ul>
 			</div>
 		case RequestState.Loading:
-			return <div>Loading...</div>
+			return <div className="lds-ellipsis">
+				<div/>
+				<div/>
+				<div/>
+				<div/>
+			</div>
 		case RequestState.NoData:
 			return <div>No data loaded !</div>
 		default:
